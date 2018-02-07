@@ -54,6 +54,8 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 print('Defined Everything')
 
+
+net.cuda()
 for epoch in range(2):  # loop over the dataset multiple times
 
     running_loss = 0.0
@@ -62,7 +64,9 @@ for epoch in range(2):  # loop over the dataset multiple times
         inputs, labels = data
 
         # wrap them in Variable
-        inputs, labels = Variable(inputs), Variable(labels)
+        # inputs, labels = Variable(inputs), Variable(labels)
+        inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
+
 
         # zero the parameter gradients
         optimizer.zero_grad()
