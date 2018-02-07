@@ -37,12 +37,12 @@ transform = transforms.Compose(
 
 trainset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=True,
                                         transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=40,
                                           shuffle=True, num_workers=2)
 
 testset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=False,
                                        transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=4,
+testloader = torch.utils.data.DataLoader(testset, batch_size=40,
                                          shuffle=False, num_workers=2)
 
 classes = ('plane', 'car', 'bird', 'cat',
@@ -55,7 +55,8 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 print('Defined Everything')
 
 
-net.cuda()
+# net.cuda()
+
 for epoch in range(2):  # loop over the dataset multiple times
 
     running_loss = 0.0
@@ -64,8 +65,8 @@ for epoch in range(2):  # loop over the dataset multiple times
         inputs, labels = data
 
         # wrap them in Variable
-        # inputs, labels = Variable(inputs), Variable(labels)
-        inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
+        inputs, labels = Variable(inputs), Variable(labels)
+        # inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
 
 
         # zero the parameter gradients
