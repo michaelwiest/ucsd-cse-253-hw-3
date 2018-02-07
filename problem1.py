@@ -1,3 +1,4 @@
+from __future__ import print_function
 from torch.autograd import Variable
 import torch
 import torch.nn as nn
@@ -51,7 +52,7 @@ classes = ('plane', 'car', 'bird', 'cat',
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-
+print('Defined Everything')
 
 for epoch in range(2):  # loop over the dataset multiple times
 
@@ -78,3 +79,4 @@ for epoch in range(2):  # loop over the dataset multiple times
             print('[%d, %5d] loss: %.3f' %
                   (epoch + 1, i + 1, running_loss / 2000))
             running_loss = 0.0
+    print('Completed an Epoch')
