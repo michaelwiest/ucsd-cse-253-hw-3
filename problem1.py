@@ -37,12 +37,12 @@ transform = transforms.Compose(
 
 trainset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=True,
                                         transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=40,
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
                                           shuffle=True, num_workers=2)
 
 testset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=False,
                                        transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=40,
+testloader = torch.utils.data.DataLoader(testset, batch_size=4,
                                          shuffle=False, num_workers=2)
 
 classes = ('plane', 'car', 'bird', 'cat',
