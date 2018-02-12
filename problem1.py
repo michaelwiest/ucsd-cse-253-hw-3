@@ -35,10 +35,6 @@ def get_class_correct(dataloader, net, classes):
             class_total[label] += 1
 
     class_perc = []
-    # for i in range(10):
-        # print('Accuracy of %5s : %2d %%' % (
-        #     classes[i], 100 * class_correct[i] / class_total[i]))
-
 
     for i in range(10):
         print('Accuracy of %5s : %2d %%' % (
@@ -71,10 +67,6 @@ transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-# trainset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=True,
-#                                         transform=transform)
-# trainloader = torch.utils.data.DataLoader(trainset, batch_size=25,
-#                                           shuffle=True, num_workers=2)
 
 trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
                                                        batch_size=25,
@@ -96,8 +88,11 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 print('Defined Everything')
 
 
-# net.cuda()
+net.cuda()
 
+train_accuracy = []
+test_accuracy = []
+validation_accuracy = []
 for epoch in range(2):  # loop over the dataset multiple times
 
     running_loss = 0.0
@@ -106,9 +101,8 @@ for epoch in range(2):  # loop over the dataset multiple times
         inputs, labels = data
 
         # wrap them in Variable
-        inputs, labels = Variable(inputs), Variable(labels)
-        # inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
-
+        # inputs, labels = Variable(inputs), Variable(labels)
+        inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -121,23 +115,22 @@ for epoch in range(2):  # loop over the dataset multiple times
 
         # print statistics
         running_loss += loss.data[0]
-        if i % 50 == 0:    # print every 50 mini-batches
+        if i % 2000 == 1999:    # print every 50 mini-batches
             print('[%d, %5d] loss: %.3f' %
                   (epoch + 1, i + 1, running_loss / 2000))
             running_loss = 0.0
-            print('test accuracy:\n')
-            print(get_accuracy(testloader, net, classes))
-
-            print('validation accuracy:\n')
-            print(get_accuracy(validationloader, net, classes))
+            # print('test accuracy:\n')
+            # print(get_accuracy(testloader, net, classes))
+            #
+            # print('validation accuracy:\n')
+            # print(get_accuracy(validationloader, net, classes))
     print('Completed an Epoch')
+    train_accuracy.append(get_accuracy(trainloader, net, classes))
+    test_accuracy.append(get_accuracy(testloader, net, classes))
+    validation_accuracy.append(get_accuracy(validationloader, net, classes))
 
 print('test accuracy:\n')
 print(get_accuracy(testloader, net, classes))
 
 print('validation accuracy:\n')
 print(get_accuracy(validationloader, net, classes))
-
-#
-# print('Accuracy of the network on the 10000 test images: %d %%' % (
-#     100 * correct / total))
