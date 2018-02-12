@@ -28,13 +28,13 @@ classes = ('plane', 'car', 'bird', 'cat',
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        #the input is 3 RBM, the output is 6 because we want 6 filters 5x5
+        #the input is 3 RBM, the output is 32 because we want 32 filters 3x3
         self.conv1 = nn.Conv2d(3, 32, 5)
-        #the input is the previous 6 filters and output is 10 filters, with 5x5
+        #the input is the previous 32 filters and output is 64 filters, with 3x3
         self.conv2 = nn.Conv2d(32, 64, 5)
         self.mp = nn.MaxPool2d(2, stride=2) #2X2 with stride 2
-        self.fc = nn.Linear(64*5*5, 120) #fully connected
-        self.fc2 = nn.Linear(120, 84) #fully connected same number neurons as classes
+        self.fc = nn.Linear(1600, 120) #fully connected
+        self.fc2 = nn.Linear(120, 10) #fully connected same number neurons as classes 10
 
     def forward(self, x):
         in_size = x.size(0)
@@ -53,7 +53,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.RMSprop(net.parameters(), lr = 0.0001)
 #atom-- LR
 
-for epoch in range(2):  # loop over the dataset multiple times
+for epoch in range(5):  # loop over the dataset multiple times
 
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
