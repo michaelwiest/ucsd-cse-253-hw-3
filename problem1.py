@@ -139,14 +139,12 @@ for epoch in range(epochs):  # loop over the dataset multiple times
     test_class_accuracy.append(get_class_accuracy(testloader, net, classes))
     validation_class_accuracy.append(get_class_accuracy(validationloader, net, classes))
 
-print('test accuracy:\n')
-print(get_accuracy(testloader, net, classes))
-
-print('validation accuracy:\n')
-print(get_accuracy(validationloader, net, classes))
 
 plt.plot(range(epochs), train_accuracy, label='Train accuracy')
 plt.plot(range(epochs), test_accuracy, label='Test accuracy')
 plt.plot(range(epochs), validation_accuracy, label='Validation accuracy')
 plt.legend(loc='upper right')
 plt.show()
+
+
+# Can do something similar for accuracy for each class. 
