@@ -15,7 +15,7 @@ def get_accuracy(dataloader, net, classes):
     total = 0
     for data in dataloader:
         inputs, labels = data
-        inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
+        inputs, labels = inputs.cuda(), labels.cuda()
 
         outputs = net(Variable(inputs))
         _, predicted = torch.max(outputs.data, 1)
@@ -28,7 +28,7 @@ def get_class_correct(dataloader, net, classes):
     class_total = list(0. for i in range(10))
     for data in dataloader:
         inputs, labels = data
-        inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
+        inputs, labels = inputs.cuda(), labels.cuda()
         outputs = net(Variable(inputs))
         _, predicted = torch.max(outputs.data, 1)
         c = (predicted == labels).squeeze()
