@@ -37,8 +37,8 @@ def get_class_correct(dataloader, net, classes):
         #     classes[i], 100 * class_correct[i] / class_total[i]))
 
 
-for i in range(10):
-    print('Accuracy of %5s : %2d %%' % (
+    for i in range(10):
+        print('Accuracy of %5s : %2d %%' % (
         classes[i], 100 * class_correct[i] / class_total[i]))
 
 class Net(nn.Module):
