@@ -1,4 +1,5 @@
 from __future__ import print_function
+from data_loader import *
 from torch.autograd import Variable
 import torch
 import torch.nn as nn
@@ -6,7 +7,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-from data_loader import *
+
 
 
 def get_accuracy(dataloader, net, classes):
