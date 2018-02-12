@@ -47,7 +47,7 @@ def get_class_correct(dataloader, net, classes):
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
+        # self.conv1 = nn.Conv2d(3, 6, 5)
         self.conv1 = nn.Conv2d(3, 6, 5)
         # self.conv2 = nn.Conv2d(6, 6, 5)
         # self.conv3 = nn.Conv2d(6, 1, 10)
@@ -59,7 +59,7 @@ class Net(nn.Module):
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
+        # x = self.pool(F.relu(self.conv2(x)))
         x = x.view(-1, 16 * 5 * 5)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -74,15 +74,15 @@ transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-trainset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=True,
-                                        transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=25,
-                                          shuffle=True, num_workers=2)
+# trainset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=True,
+#                                         transform=transform)
+# trainloader = torch.utils.data.DataLoader(trainset, batch_size=25,
+#                                           shuffle=True, num_workers=2)
 
-# trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
-#                                                        batch_size=25,
-#                                                        augment=False,
-#                                                        random_seed=2)
+trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
+                                                       batch_size=25,
+                                                       augment=False,
+                                                       random_seed=2)
 
 testset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=False,
                                        transform=transform)

@@ -11,6 +11,10 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 from utils import plot_images
+import numpy as np
+import torch
+from torchvision import datasets, transforms
+from torch.utils.data.sampler import SubsetRandomSampler
 
 def get_train_valid_loader(data_dir,
                            batch_size,
