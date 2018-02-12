@@ -7,7 +7,7 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 
-def get_accuracy(dataloader, net):
+def get_accuracy(dataloader, net, classes):
     correct = 0
     total = 0
     for data in dataloader:
@@ -18,7 +18,7 @@ def get_accuracy(dataloader, net):
         correct += (predicted == labels).sum()
     return 100.0 * correct / total
 
-def get_class_correct(dataloader, net):
+def get_class_correct(dataloader, net, classes):
     class_correct = list(0. for i in range(10))
     class_total = list(0. for i in range(10))
     for data in dataloader:
@@ -121,17 +121,22 @@ for epoch in range(2):  # loop over the dataset multiple times
 
         # print statistics
         running_loss += loss.data[0]
-        if i % 10 == 0:    # print every 2000 mini-batches
+        if i % 50 == 0:    # print every 50 mini-batches
             print('[%d, %5d] loss: %.3f' %
                   (epoch + 1, i + 1, running_loss / 2000))
             running_loss = 0.0
+            print('test accuracy:\n')
+            print(get_accuracy(testloader, net, classes))
+
+            print('validation accuracy:\n')
+            print(get_accuracy(validationloader, net, classes))
     print('Completed an Epoch')
 
 print('test accuracy:\n')
-print(get_accuracy(testloader, net))
+print(get_accuracy(testloader, net, classes))
 
 print('validation accuracy:\n')
-print(get_accuracy(validationloader, net))
+print(get_accuracy(validationloader, net, classes))
 
 #
 # print('Accuracy of the network on the 10000 test images: %d %%' % (
