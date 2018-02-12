@@ -14,8 +14,10 @@ def get_accuracy(dataloader, net, classes):
     correct = 0
     total = 0
     for data in dataloader:
-        images, labels = data
-        outputs = net(Variable(images))
+        inputs, labels = data
+        inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
+
+        outputs = net(Variable(inputs))
         _, predicted = torch.max(outputs.data, 1)
         total += labels.size(0)
         correct += (predicted == labels).sum()
@@ -25,8 +27,9 @@ def get_class_correct(dataloader, net, classes):
     class_correct = list(0. for i in range(10))
     class_total = list(0. for i in range(10))
     for data in dataloader:
-        images, labels = data
-        outputs = net(Variable(images))
+        inputs, labels = data
+        inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
+        outputs = net(Variable(inputs))
         _, predicted = torch.max(outputs.data, 1)
         c = (predicted == labels).squeeze()
         for i in range(4):
@@ -37,8 +40,8 @@ def get_class_correct(dataloader, net, classes):
     class_perc = []
 
     for i in range(10):
-        print('Accuracy of %5s : %2d %%' % (
-        classes[i], 100 * class_correct[i] / class_total[i]))
+        class_perc.append(100.0 * class_correct[i] / class_total[i])
+    return class_perc
 
 class Net(nn.Module):
     def __init__(self):
@@ -119,11 +122,7 @@ for epoch in range(2):  # loop over the dataset multiple times
             print('[%d, %5d] loss: %.3f' %
                   (epoch + 1, i + 1, running_loss / 2000))
             running_loss = 0.0
-            # print('test accuracy:\n')
-            # print(get_accuracy(testloader, net, classes))
-            #
-            # print('validation accuracy:\n')
-            # print(get_accuracy(validationloader, net, classes))
+
     print('Completed an Epoch')
     train_accuracy.append(get_accuracy(trainloader, net, classes))
     test_accuracy.append(get_accuracy(testloader, net, classes))
