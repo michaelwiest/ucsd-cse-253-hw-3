@@ -48,8 +48,11 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
+        self.conv2 = nn.Conv2d(6, 10, 5)
         self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.conv3 = nn.Conv2d(10, 10, 5)
+        self.conv4 = nn.Conv2d(10, 16, 5)
+
         self.fc1 = nn.Linear(16 * 5 * 5, 120)
         torch.nn.init.xavier_uniform(self.fc1.weight)
         self.fc2 = nn.Linear(120, 84)
@@ -58,9 +61,16 @@ class Net(nn.Module):
         torch.nn.init.xavier_uniform(self.fc3.weight)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
+        input_size = x.size(0)
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = self.pool(x)
+        x = F.reul(self.conv3(x))
+        x = F.relu(self.conv4(x))
+        # x = self.pool(F.relu(self.conv1(x)))
+        # x = self.pool(F.relu(self.conv2(x)))
+        # x = x.view(-1, 16 * 5 * 5)
+        x = x.view(input_size, -1)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
