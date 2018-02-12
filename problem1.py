@@ -74,15 +74,15 @@ transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-# trainset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=True,
-#                                         transform=transform)
-# trainloader = torch.utils.data.DataLoader(trainset, batch_size=25,
-#                                           shuffle=True, num_workers=2)
+trainset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=True,
+                                        transform=transform)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=25,
+                                          shuffle=True, num_workers=2)
 
-trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
-                                                       batch_size=25,
-                                                       augment=False,
-                                                       random_seed=2)
+# trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
+#                                                        batch_size=25,
+#                                                        augment=False,
+#                                                        random_seed=2)
 
 testset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=False,
                                        transform=transform)
