@@ -15,3 +15,9 @@ or
 You can clone this repo into either the container started from:
 `launch-pytorch-gpu.sh`
 Or just more generally into your position on the `ieng6` cluster.
+
+
+### Credit
+
+Credit to [this repo](https://gist.github.com/kevinzakka/d33bf8d6c7f06a9d8c76d97a7879f5cb)
+for the validation data loader.

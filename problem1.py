@@ -7,13 +7,49 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 
+def get_accuracy(dataloader, net):
+    correct = 0
+    total = 0
+    for data in dataloader:
+        images, labels = data
+        outputs = net(Variable(images))
+        _, predicted = torch.max(outputs.data, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum()
+    return 100.0 * correct / total
+
+def get_class_correct(dataloader, net):
+    class_correct = list(0. for i in range(10))
+    class_total = list(0. for i in range(10))
+    for data in dataloader:
+        images, labels = data
+        outputs = net(Variable(images))
+        _, predicted = torch.max(outputs.data, 1)
+        c = (predicted == labels).squeeze()
+        for i in range(4):
+            label = labels[i]
+            class_correct[label] += c[i]
+            class_total[label] += 1
+
+    class_perc = []
+    for i in range(10):
+        # print('Accuracy of %5s : %2d %%' % (
+        #     classes[i], 100 * class_correct[i] / class_total[i]))
+
+
+for i in range(10):
+    print('Accuracy of %5s : %2d %%' % (
+        classes[i], 100 * class_correct[i] / class_total[i]))
 
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
+        self.conv1 = nn.Conv2d(3, 6, 5)
+        # self.conv2 = nn.Conv2d(6, 6, 5)
+        # self.conv3 = nn.Conv2d(6, 1, 10)
         self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
+        self.conv3 = nn.Conv2d(6, 16, 5)
         self.fc1 = nn.Linear(16 * 5 * 5, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
@@ -35,14 +71,19 @@ transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-trainset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=True,
-                                        transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
-                                          shuffle=True, num_workers=2)
+# trainset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=True,
+#                                         transform=transform)
+# trainloader = torch.utils.data.DataLoader(trainset, batch_size=25,
+#                                           shuffle=True, num_workers=2)
+
+trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
+                                                       batch_size=25,
+                                                       augment=False,
+                                                       random_seed=2)
 
 testset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=False,
                                        transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=4,
+testloader = torch.utils.data.DataLoader(testset, batch_size=25,
                                          shuffle=False, num_workers=2)
 
 classes = ('plane', 'car', 'bird', 'cat',
@@ -80,8 +121,18 @@ for epoch in range(2):  # loop over the dataset multiple times
 
         # print statistics
         running_loss += loss.data[0]
-        if i % 2000 == 1999:    # print every 2000 mini-batches
+        if i % 10 == 0:    # print every 2000 mini-batches
             print('[%d, %5d] loss: %.3f' %
                   (epoch + 1, i + 1, running_loss / 2000))
             running_loss = 0.0
     print('Completed an Epoch')
+
+print('test accuracy:\n')
+print(get_accuracy(testloader, net))
+
+print('validation accuracy:\n')
+print(get_accuracy(validationloader, net))
+
+#
+# print('Accuracy of the network on the 10000 test images: %d %%' % (
+#     100 * correct / total))
