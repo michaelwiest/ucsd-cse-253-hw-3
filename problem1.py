@@ -7,6 +7,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
 
 
 
@@ -23,7 +24,7 @@ def get_accuracy(dataloader, net, classes):
         correct += (predicted == labels).sum()
     return 100.0 * correct / total
 
-def get_class_correct(dataloader, net, classes):
+def get_class_accuracy(dataloader, net, classes):
     class_correct = list(0. for i in range(10))
     class_total = list(0. for i in range(10))
     for data in dataloader:
@@ -96,7 +97,13 @@ net.cuda()
 train_accuracy = []
 test_accuracy = []
 validation_accuracy = []
-for epoch in range(2):  # loop over the dataset multiple times
+
+train_class_accuracy = []
+test_class_accuracy = []
+validation_class_accuracy = []
+
+epochs = 4
+for epoch in range(epochs):  # loop over the dataset multiple times
 
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
@@ -128,8 +135,16 @@ for epoch in range(2):  # loop over the dataset multiple times
     test_accuracy.append(get_accuracy(testloader, net, classes))
     validation_accuracy.append(get_accuracy(validationloader, net, classes))
 
-print('test accuracy:\n')
-print(get_accuracy(testloader, net, classes))
+    train_class_accuracy.append(get_class_accuracy(trainloader, net, classes))
+    test_class_accuracy.append(get_class_accuracy(testloader, net, classes))
+    validation_class_accuracy.append(get_class_accuracy(validationloader, net, classes))
 
-print('validation accuracy:\n')
-print(get_accuracy(validationloader, net, classes))
+
+plt.plot(range(epochs), train_accuracy, label='Train accuracy')
+plt.plot(range(epochs), test_accuracy, label='Test accuracy')
+plt.plot(range(epochs), validation_accuracy, label='Validation accuracy')
+plt.legend(loc='upper right')
+plt.show()
+
+
+# Can do something similar for accuracy for each class. 
