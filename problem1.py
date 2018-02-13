@@ -45,25 +45,27 @@ def get_class_accuracy(dataloader, net, classes):
         class_perc.append(100.0 * class_correct[i] / class_total[i])
     return class_perc
 
-
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         #the input is 3 RBM, the output is 32 because we want 32 filters 3x3
-        self.conv0 = nn.Conv2d(3, 32, 5) # output is 28
-        self.conv1 = nn.Conv2d(32, 64, 5) # Output is 24
-        self.mp = nn.MaxPool2d(2, stride=2) # Output is 12
-        self.conv2 = nn.Conv2d(64, 128, 3, padding=2) # output is 14
-        self.conv3 = nn.Conv2d(128, 64, 1) # Output is 14.
-        # Do another map. Output is 7
+        self.conv0 = nn.Conv2d(3, 32, 4, stride=2, padding=2) # output is 17
+        self.conv1 = nn.Conv2d(32, 64, 4, padding=3) # Output is 20
+        self.mp = nn.MaxPool2d(2, stride=2) # Output is 10
+        self.conv2 = nn.Conv2d(64, 128, 3, padding=2) # output is 12
+        self.conv3 = nn.Conv2d(128, 64, 1) # Output is 12
+        # Do another map. Output is 6
+        self.bn1 = nn.BatchNorm1d(128)
+        self.bn2 = nn.BatchNorm2d(5 * 32 * 17 * 17)
 
-        self.fc0 = nn.Linear(7 * 7 * 64, 120) #fully connected
-        self.fc1 = nn.Linear(120, 120)
-        self.fc2 = nn.Linear(120, 10) #fully connected same number neurons as classes 10
+        self.fc0 = nn.Linear(64 * 6 * 6, 128) #fully connected
+        self.fc1 = nn.Linear(128, 128)
+        self.fc2 = nn.Linear(128, 10) #fully connected same number neurons as classes 10
 
     def forward(self, x):
 
         x = F.relu(self.conv0(x))
+        # x = self.bn2(x)
         x = F.relu(self.conv1(x))
         x = self.mp(x)
         x = F.relu(self.conv2(x))
@@ -72,7 +74,9 @@ class Net(nn.Module):
         in_size = x.size(0)
         x = x.view(in_size, -1) #flatten for fc
         x = F.relu(self.fc0(x))
+        x = self.bn1(x)
         x = F.relu(self.fc1(x))
+        x = self.bn1(x)
         x = self.fc2(x)
         return F.log_softmax(x)
 
@@ -86,6 +90,7 @@ transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
+global batch_size
 batch_size = 5
 trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
                                                        batch_size=batch_size,
@@ -110,7 +115,7 @@ Instantiate net and optimizer.
 net = Net()
 criterion = nn.CrossEntropyLoss()
 # optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-optimizer = optim.Adam(net.parameters(), lr=0.001)
+optimizer = optim.Adam(net.parameters(), lr=0.0001)
 
 
 
@@ -129,7 +134,7 @@ train_class_accuracy = []
 test_class_accuracy = []
 validation_class_accuracy = []
 
-epochs = 4
+epochs = 15
 for epoch in range(epochs):  # loop over the dataset multiple times
 
     running_loss = 0.0
@@ -210,5 +215,5 @@ for i in range(len(classes)):
 
 # Fine-tune figure; hide x ticks for top plots and y ticks for right plots
 plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
-plt.setp([a.get_yticklabels() for a in axarr[:, 1]], visible=False)
+plt.setp([a.get_yticklabels() for a in axarr[:, 1:]], visible=False)
 plt.show()
