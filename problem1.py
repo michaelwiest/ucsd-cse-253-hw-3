@@ -1,3 +1,7 @@
+# https://github.com/pytorch/tutorials/blob/master/beginner_source/blitz/cifar10_tutorial.py
+# CIFAR10 dir =
+
+
 from __future__ import print_function
 from data_loader import *
 from torch.autograd import Variable
@@ -8,8 +12,18 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
+from six.moves import cPickle as pickle
+from  PIL import Image
+import numpy as np
+import random
 
 
+######################## FUNCTIONS ########################
+
+def imshow(img):
+    img = img / 2 + 0.5     # unnormalize
+    npimg = img.numpy()
+    plt.imshow(np.transpose(npimg, (1, 2, 0)), interpolation='nearest')
 
 def get_accuracy(dataloader, net, classes):
     correct = 0
@@ -44,6 +58,8 @@ def get_class_accuracy(dataloader, net, classes):
         class_perc.append(100.0 * class_correct[i] / class_total[i])
     return class_perc
 
+######################## NET CLASS ########################
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -64,20 +80,28 @@ class Net(nn.Module):
         return x
 
 
-net = Net()
+######################## IMPORT DATA ####################################
+# The output of torchvision datasets are PILImage images of range [0, 1].
+# We transform them to Tensors of normalized range [-1, 1].
 
+CIFAR10dir = '/Users/pablo_tostado/Pablo_Tostado/ML_Datasets/CIFAR10'
 
 transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
+# ## ON SERVER
+# trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
+#                                                        batch_size=25,
+#                                                        augment=False,
+#                                                        random_seed=2)
 
-trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
-                                                       batch_size=25,
-                                                       augment=False,
-                                                       random_seed=2)
+trainset = torchvision.datasets.CIFAR10(root=CIFAR10dir, train=True,
+                                        download=True, transform=transform)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=10,
+                                          shuffle=True, num_workers=2)
 
-testset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=False,
+testset = torchvision.datasets.CIFAR10(root=CIFAR10dir, train=False,
                                        transform=transform)
 testloader = torch.utils.data.DataLoader(testset, batch_size=25,
                                          shuffle=False, num_workers=2)
@@ -85,25 +109,48 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=25,
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
+####################### VISUALIZE IMAGES ############################################
+
+##### Print images of a given training BATCH
+dataiter = iter(trainloader)
+images, labels = dataiter.next()
+# show images
+imshow(torchvision.utils.make_grid(images))
+print(' '.join('%5s' % classes[labels[j]] for j in range(0, len(labels))))
 
 
+##### Print figure with 1 random image from each class
+train_labels = [] # Get labels
+for im in xrange(0, len(trainset)):
+    train_labels.append(trainset[im][1])
+train_labels = np.array(train_labels)
+
+fig = plt.figure(figsize=(8,3))
+for i in range(10):
+    print (i)
+    ax = fig.add_subplot(2, 5, 1 + i, xticks=[], yticks=[])
+    idx = np.where(train_labels==i)     # Find images with target label
+    idx = random.choice(idx[0])         # Pick random idx of current class
+    img = trainset[idx][0] #Take image
+    ax.set_title(classes[i])
+    imshow(img)
+plt.show()
+
+####################### RUN NET ############################################
+
+net = Net()
+net.cuda()
+
+# Loss Function
 criterion = nn.CrossEntropyLoss()
+# SGD with momentum optimizer
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 print('Defined Everything')
-
-
-net.cuda()
 
 train_accuracy = []
 test_accuracy = []
 validation_accuracy = []
-
-train_class_accuracy = []
-test_class_accuracy = []
-validation_class_accuracy = []
-
-epochs = 4
-for epoch in range(epochs):  # loop over the dataset multiple times
+for epoch in range(2):  # loop over the dataset multiple times
 
     running_loss = 0.0
     for i, data in enumerate(trainloader, 0):
@@ -135,16 +182,8 @@ for epoch in range(epochs):  # loop over the dataset multiple times
     test_accuracy.append(get_accuracy(testloader, net, classes))
     validation_accuracy.append(get_accuracy(validationloader, net, classes))
 
-    train_class_accuracy.append(get_class_accuracy(trainloader, net, classes))
-    test_class_accuracy.append(get_class_accuracy(testloader, net, classes))
-    validation_class_accuracy.append(get_class_accuracy(validationloader, net, classes))
+print('test accuracy:\n')
+print(get_accuracy(testloader, net, classes))
 
-
-plt.plot(range(epochs), train_accuracy, label='Train accuracy')
-plt.plot(range(epochs), test_accuracy, label='Test accuracy')
-plt.plot(range(epochs), validation_accuracy, label='Validation accuracy')
-plt.legend(loc='upper right')
-plt.show()
-
-
-# Can do something similar for accuracy for each class. 
+print('validation accuracy:\n')
+print(get_accuracy(validationloader, net, classes))
