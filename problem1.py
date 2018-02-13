@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 
 
+
 def get_accuracy(dataloader, net, classes):
     correct = 0
     total = 0
@@ -44,55 +45,81 @@ def get_class_accuracy(dataloader, net, classes):
         class_perc.append(100.0 * class_correct[i] / class_total[i])
     return class_perc
 
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
+        #the input is 3 RBM, the output is 32 because we want 32 filters 3x3
+        self.conv0 = nn.Conv2d(3, 32, 5) # output is 28
+        self.conv1 = nn.Conv2d(32, 64, 5) # Output is 24
+        self.mp = nn.MaxPool2d(2, stride=2) # Output is 12
+        self.conv2 = nn.Conv2d(64, 128, 3, padding=2) # output is 14
+        self.conv3 = nn.Conv2d(128, 64, 1) # Output is 14.
+        # Do another map. Output is 7
+
+        self.fc0 = nn.Linear(7 * 7 * 64, 120) #fully connected
+        self.fc1 = nn.Linear(120, 120)
+        self.fc2 = nn.Linear(120, 10) #fully connected same number neurons as classes 10
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
+
+        x = F.relu(self.conv0(x))
+        x = F.relu(self.conv1(x))
+        x = self.mp(x)
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = self.mp(x)
+        in_size = x.size(0)
+        x = x.view(in_size, -1) #flatten for fc
+        x = F.relu(self.fc0(x))
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+        x = self.fc2(x)
+        return F.log_softmax(x)
 
 
-net = Net()
 
 
+'''
+Load in all of the data. And set the transforms.
+'''
 transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-
+batch_size = 5
 trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
-                                                       batch_size=25,
+                                                       batch_size=batch_size,
                                                        augment=False,
                                                        random_seed=2)
 
-testset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=False,
-                                       transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=25,
-                                         shuffle=False, num_workers=2)
+
+testloader = get_test_loader(data_dir='/datasets/CIFAR-10',
+                             batch_size=batch_size)
 
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 
 
+
+'''
+Instantiate net and optimizer.
+'''
+
+
+net = Net()
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-print('Defined Everything')
+# optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+optimizer = optim.Adam(net.parameters(), lr=0.001)
+
 
 
 net.cuda()
+
+'''
+Training.
+
+'''
 
 train_accuracy = []
 test_accuracy = []
@@ -147,4 +174,4 @@ plt.legend(loc='upper right')
 plt.show()
 
 
-# Can do something similar for accuracy for each class. 
+# Can do something similar for accuracy for each class.
