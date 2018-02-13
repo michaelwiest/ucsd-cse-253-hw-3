@@ -106,11 +106,7 @@ class Net(nn.Module):
             outs[i] = self.branches[i](x)
             outs[i] = outs[i].view(outs[i].size(0), -1)
             outs[i] = self.classifier[i](outs[i])
-        # for out in outs:
-        #     print(out.shape)
-        return F.log_softmax(torch.cat([b for b in outs], 1))
-        # return F.log_softmax(x)
-        # return F.log_softmax(self.classifier[0](x))
+        return F.log_softmax(torch.cat([out for out in outs], 1))
 
 
 
@@ -215,9 +211,9 @@ Plotting
 '''
 Total accuracy
 '''
-plt.plot(range(epochs), train_accuracy, label='Train accuracy')
-plt.plot(range(epochs), test_accuracy, label='Test accuracy')
-plt.plot(range(epochs), validation_accuracy, label='Validation accuracy')
+plt.plot(range(len(train_accuracy)), train_accuracy, label='Train accuracy')
+plt.plot(range(len(test_accuracy)), test_accuracy, label='Test accuracy')
+plt.plot(range(len(validation_accuracy)), validation_accuracy, label='Validation accuracy')
 plt.xlabel('Epochs')
 plt.ylabel('Percent Accuracy')
 plt.title('Training accuracy over: \n{} Iterations'.format(epochs), fontsize=16)
@@ -240,9 +236,9 @@ for i in range(len(classes)):
         col = i
 
     print(row, col)
-    axarr[row, col].plot(range(epochs), list(np.array(train_class_accuracy)[:, i]), label='Train accuracy')
-    axarr[row, col].plot(range(epochs), list(np.array(test_class_accuracy)[:, i]), label='Test accuracy')
-    axarr[row, col].plot(range(epochs), list(np.array(validation_class_accuracy)[:, i]), label='Validation accuracy')
+    axarr[row, col].plot(range(len(train_class_accuracy)), list(np.array(train_class_accuracy)[:, i]), label='Train accuracy')
+    axarr[row, col].plot(range(len(test_class_accuracy)), list(np.array(test_class_accuracy)[:, i]), label='Test accuracy')
+    axarr[row, col].plot(range(len(validation_class_accuracy)), list(np.array(validation_class_accuracy)[:, i]), label='Validation accuracy')
     axarr[row, col].set_title('Accuracy for class:\n{}'.format(classes[i]))
 
 # Fine-tune figure; hide x ticks for top plots and y ticks for right plots
