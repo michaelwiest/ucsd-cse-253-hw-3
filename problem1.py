@@ -61,41 +61,35 @@ class Net(nn.Module):
                 nn.Conv2d(64, 32, 1), # Output is 12
                 nn.ReLU(),
                 nn.MaxPool2d(2, stride=2) # Output is 6
-                )
+                ),
+            nn.Sequential(
+                nn.Conv2d(3, 32, 8, stride=4, padding=2), # output is 8
+                nn.ReLU(),
+                nn.Conv2d(32, 64, 2, padding=2), # Output is 5
+                nn.ReLU(),
+                nn.Conv2d(64, 32, 1)
+                ) # Output is 5
                 ]
         self.classifier = [
             nn.Sequential(
-            nn.Linear(64 * 6 * 6, 128), #fully connected
-            nn.ReLU(),
-            nn.BatchNorm1d(128),
-            nn.Linear(128, 128),
-            nn.ReLU(),
-            nn.BatchNorm1d(128),
-            nn.Linear(128, 10)
+                nn.Linear(32 * 6 * 6, 128), #fully connected
+                nn.ReLU(),
+                nn.BatchNorm1d(128),
+                nn.Linear(128, 128),
+                nn.ReLU(),
+                nn.BatchNorm1d(128),
+                nn.Linear(128, 10)
+            ),
+            nn.Sequential(
+                nn.Linear(32 * 5 * 5, 128), #fully connected
+                nn.ReLU(),
+                nn.BatchNorm1d(128),
+                nn.Linear(128, 128),
+                nn.ReLU(),
+                nn.BatchNorm1d(128),
+                nn.Linear(128, 10)
             )
         ]
-            #     ),
-            #
-            # nn.Sequential(
-            #     nn.Conv2d(3, 32, 4, stride=2, padding=2), # output is 17
-            #     nn.ReLU(),
-            #     nn.Conv2d(32, 64, 4, padding=3), # Output is 20
-            #     nn.ReLU(),
-            #     nn.Conv2d(64, 32, 1), # Output is 20
-            #     nn.MaxPool2d(2, stride=2), # Output is 10
-            #     nn.Conv2d(32, 64, 3, padding=2), # output is 12
-            #     nn.ReLU(),
-            #     nn.Conv2d(64, 32, 1), # Output is 12
-            #     nn.ReLU(),
-            #     nn.MaxPool2d(2, stride=2), # Output is 6
-            #     nn.Linear(64 * 6 * 6, 128), #fully connected
-            #     nn.ReLU(),
-            #     nn.BatchNorm1d(128),
-            #     nn.Linear(128, 128),
-            #     nn.ReLU(),
-            #     nn.BatchNorm1d(128),
-            #     nn.Linear(128, 10)
-            #     )
 
         # **EDIT**: need to call add_module
         # for i, branch in enumerate(self.branches):
@@ -105,10 +99,11 @@ class Net(nn.Module):
         self.add_module(str(1), self.classifier[0])
 
     def forward(self, x):
-        f = self.branches[0](x)
+        x = self.branches[0](x)
         x = x.view(x.size(0), -1)
-        return F.log_softmax(self.classifier(x))
-        # return F.log_softmax(torch.cat([b(x) for b in self.branches], 0))
+        x = self.classifier[0](x)
+        return F.log_softmax(x)
+        # return F.log_softmax(self.classifier[0](x))
 
 
 
