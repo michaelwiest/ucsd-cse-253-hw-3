@@ -11,6 +11,28 @@ import matplotlib.pyplot as plt
 
 
 
+'''
+Load in all of the data. And set the transforms.
+'''
+transform = transforms.Compose(
+    [transforms.ToTensor(),
+     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+batch_size = 5
+trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
+                                                       batch_size=batch_size,
+                                                       augment=False,
+                                                       random_seed=2)
+
+
+testloader = get_test_loader(data_dir='/datasets/CIFAR-10',
+                             batch_size=batch_size)
+
+classes = ('plane', 'car', 'bird', 'cat',
+           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
+
+
 def get_accuracy(dataloader, net, classes):
     correct = 0
     total = 0
@@ -44,66 +66,76 @@ def get_class_accuracy(dataloader, net, classes):
         class_perc.append(100.0 * class_correct[i] / class_total[i])
     return class_perc
 
+# class Net(nn.Module):
+#     def __init__(self):
+#         super(Net, self).__init__()
+#         self.conv1 = nn.Conv2d(3, 32, 5)
+#         self.conv2 = nn.Conv2d(32, 64, 5)
+        # self.pool = nn.MaxPool2d(2, 2)
+#         self.conv3 = nn.Conv2d(64, 128, 5)
+#         self.conv4 = nn.Conv2d(128, 256, 5)
+#
+#         self.fc1 = nn.Linear(256 * 5 * 5, 120)
+#         torch.nn.init.xavier_uniform(self.fc1.weight)
+#         self.fc2 = nn.Linear(120, 84)
+#         torch.nn.init.xavier_uniform(self.fc2.weight)
+#         self.fc3 = nn.Linear(84, 10)
+#         # torch.nn.init.xavier_uniform(self.fc3.weight)
+#
+#     def forward(self, x):
+#         in_size = x.size(0)
+#         x = F.relu(self.conv1(x))
+#         x = F.relu(self.conv2(x))
+#         x = self.pool(x)
+#         x = F.relu(self.conv3(x))
+#         x = F.relu(self.conv4(x))
+#         x = self.pool(x)
+#         # x = self.pool(F.relu(self.conv1(x)))
+#         # x = self.pool(F.relu(self.conv2(x)))
+#         # x = x.view(-1, 16 * 5 * 5)
+#         # x = x.view(-1, 12 * 5 * 5)
+#         # x = x.view(256 * 5 * 5, -1)
+#         x = x.view(-1, in_size)
+#         x = F.relu(self.fc1(x))
+#         x = F.relu(self.fc2(x))
+#         x = self.fc3(x)
+#         return x
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.conv2 = nn.Conv2d(6, 10, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv3 = nn.Conv2d(10, 12, 5)
-        self.conv4 = nn.Conv2d(12, 16, 5)
+        #the input is 3 RBM, the output is 32 because we want 32 filters 3x3
+        self.conv1 = nn.Conv2d(3, 32, 5)
+        #the input is the previous 32 filters and output is 64 filters, with 3x3
+        self.conv2 = nn.Conv2d(32, 64, 5)
+        self.mp = nn.MaxPool2d(2, stride=2) #2X2 with stride 2
 
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        torch.nn.init.xavier_uniform(self.fc1.weight)
-        self.fc2 = nn.Linear(120, 84)
-        torch.nn.init.xavier_uniform(self.fc2.weight)
-        self.fc3 = nn.Linear(84, 10)
-        torch.nn.init.xavier_uniform(self.fc3.weight)
+        self.fc = nn.Linear(12 * 12 * 64, 120) #fully connected
+        self.fc2 = nn.Linear(120, 10) #fully connected same number neurons as classes 10
 
     def forward(self, x):
-        input_size = x.size(0)
+
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
-        x = self.pool(x)
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.conv4(x))
-        # x = self.pool(F.relu(self.conv1(x)))
-        # x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
-        # x = x.view(input_size, -1)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+        x = self.mp(x)
+        # x = F.relu(self.mp(self.conv1(x))) #conv then mp then relu
+        # x = F.relu(self.mp(self.conv2(x)))
+        in_size = x.size(0)
+        x = x.view(in_size, -1) #flatten for fc
+        x = F.relu(self.fc(x))
+        x = self.fc2(x)
+        return F.log_softmax(x)
+
 
 
 net = Net()
-
-
-transform = transforms.Compose(
-    [transforms.ToTensor(),
-     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-
-
-trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
-                                                       batch_size=25,
-                                                       augment=False,
-                                                       random_seed=2)
-
-testset = torchvision.datasets.CIFAR10(root='/datasets/CIFAR-10', train=False,
-                                       transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=25,
-                                         shuffle=False, num_workers=2)
-
-classes = ('plane', 'car', 'bird', 'cat',
-           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 
 
 criterion = nn.CrossEntropyLoss()
 # optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 optimizer = optim.Adam(net.parameters(), lr=0.001)
-print('Defined Everything')
+
 
 
 net.cuda()
