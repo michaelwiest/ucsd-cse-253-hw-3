@@ -212,16 +212,14 @@ Plotting
 '''
 Total accuracy
 '''
-plt.plot(range(len(train_accuracy)), train_accuracy, label='Train accuracy')
-plt.plot(range(len(test_accuracy)), test_accuracy, label='Test accuracy')
-plt.plot(range(len(validation_accuracy)), validation_accuracy, label='Validation accuracy')
+plt.plot(range(len(train_accuracy)), train_accuracy, label='Train accuracy: {}%'.format(str(train_accuracy[-1])[:4]))
+plt.plot(range(len(test_accuracy)), test_accuracy, label='Test accuracy: {}%'.format(str(test_accuracy[-1])[:4]))
+plt.plot(range(len(validation_accuracy)), validation_accuracy, label='Validation accuracy: {}%'.format(str(validation_accuracy[-1])[:4]))
 plt.xlabel('Epochs')
 plt.ylabel('Percent Accuracy')
 plt.title('Training accuracy over: \n{} Iterations'.format(epochs), fontsize=16)
 plt.legend(loc='lower right')
 plt.show()
-
-
 
 '''
 Accuracy by class.
