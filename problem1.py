@@ -167,11 +167,48 @@ for epoch in range(epochs):  # loop over the dataset multiple times
     validation_class_accuracy.append(get_class_accuracy(validationloader, net, classes))
 
 
+
+
+'''
+
+Plotting
+
+'''
+
+'''
+Total accuracy
+'''
 plt.plot(range(epochs), train_accuracy, label='Train accuracy')
 plt.plot(range(epochs), test_accuracy, label='Test accuracy')
 plt.plot(range(epochs), validation_accuracy, label='Validation accuracy')
-plt.legend(loc='upper right')
+plt.xlabel('Epochs')
+plt.ylabel('Percent Accuracy')
+plt.title('Training accuracy over: \n{} Iterations'.format(epochs), fontsize=16)
+plt.legend(loc='lower right')
 plt.show()
 
 
-# Can do something similar for accuracy for each class.
+
+'''
+Accuracy by class.
+'''
+
+f, axarr = plt.subplots(2, 5)
+for i in range(len(classes)):
+    if int((i) / 5) > 0:
+        row = 1
+        col = i % 5
+    else:
+        row = 0
+        col = i
+
+    print(row, col)
+    axarr[row, col].plot(range(epochs), list(np.array(train_class_accuracy)[:, i]), label='Train accuracy')
+    axarr[row, col].plot(range(epochs), list(np.array(test_class_accuracy)[:, i]), label='Test accuracy')
+    axarr[row, col].plot(range(epochs), list(np.array(validation_class_accuracy)[:, i]), label='Validation accuracy')
+    axarr[row, col].set_title('Accuracy for class:\n{}'.format(classes[i]))
+
+# Fine-tune figure; hide x ticks for top plots and y ticks for right plots
+plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
+plt.setp([a.get_yticklabels() for a in axarr[:, 1]], visible=False)
+plt.show()
