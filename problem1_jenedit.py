@@ -62,7 +62,7 @@ rl_epoch=[]
 rl_epoch_test=[]
 acc_test=[]
 acc_train=[]
-for epoch in range(2):  # loop over the dataset multiple times
+for epoch in range(10):  # loop over the dataset multiple times
 
     running_loss = 0.0
     running_loss_test = 0.0
@@ -94,7 +94,6 @@ for epoch in range(2):  # loop over the dataset multiple times
                   (epoch + 1, i + 1, running_loss / 2000))
             running_loss = 0.0
 
-    running_loss_t = 0.0
     correct = 0
     total = 0
     for data_test in testloader:
@@ -103,31 +102,31 @@ for epoch in range(2):  # loop over the dataset multiple times
         _, predicted_test = torch.max(outputs_test.data, 1)
         total += labels_test.size(0)
         correct += (predicted_test == labels_test).sum()
-    acc = (100 * correct / total)
+    acc = (100 * float(correct) / total)
     if acc == 0:
         pdb.set_trace()
 
-    print('Accuracy of the network on the 10000 test images: %d %%' % (
+    print('Accuracy of the network on the test images:' + str(
         100 * correct / total))
     print('Completed an Epoch')
     rl_epoch.append(rl_vec[-1])
-    rl_epoch_test.append(1-(acc/100.0))
+    # rl_epoch_test.append(1-(acc/100.0))
     acc_test.append(acc)
-    acc_train.append(100*(1-rl_vec[-1]))
-print('Test Accuracy:' % acc_test )
-print('Train Accuracy:: ' % acc_train)
-plt.figure()
-plt.plot(range(2),acc_train,'Training Accuracy per Epoch')
-plt.plot(range(2),acc_test,'Testing Accuracy per Epoch')
-plt.xlabel('Epochs')
-plt.ylabel('Accuracy')
-
-plt.show()
-
-plt.figure()
-plt.plot(range(2),rl_epoch,'Training Loss per Epoch')
-plt.plot(range(2),rl_epoch_train,'Testing Loss per Epoch')
-plt.xlabel('Epochs')
-plt.ylabel('Loss')
-
-plt.show()
+    # acc_train.append(100*(1-rl_vec[-1]))
+print('Test Accuracy:' + str(acc_test))
+print('Train Loss: ' + str(rl_epoch))
+# plt.figure()
+# plt.plot(range(2),acc_train,'Training Accuracy per Epoch')
+# plt.plot(range(2),acc_test,'Testing Accuracy per Epoch')
+# plt.xlabel('Epochs')
+# plt.ylabel('Accuracy')
+#
+# plt.show()
+#
+# plt.figure()
+# plt.plot(range(2),rl_epoch,'Training Loss per Epoch')
+# plt.plot(range(2),rl_epoch_train,'Testing Loss per Epoch')
+# plt.xlabel('Epochs')
+# plt.ylabel('Loss')
+#
+# plt.show()
