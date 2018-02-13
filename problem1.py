@@ -123,11 +123,13 @@ batch_size = 5
 trainloader, validationloader = get_train_valid_loader(data_dir='/datasets/CIFAR-10',
                                                        batch_size=batch_size,
                                                        augment=False,
-                                                       random_seed=2)
+                                                       random_seed=2,
+                                                       pin_memory=True)
 
 
 testloader = get_test_loader(data_dir='/datasets/CIFAR-10',
-                             batch_size=batch_size)
+                             batch_size=batch_size,
+                             pin_memory=True)
 
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
@@ -142,8 +144,7 @@ Instantiate net and optimizer.
 
 net = Net()
 criterion = nn.CrossEntropyLoss()
-# optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
-optimizer = optim.Adam(net.parameters(), lr=0.0001)
+optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 
 
@@ -243,5 +244,4 @@ for i in range(len(classes)):
 
 # Fine-tune figure; hide x ticks for top plots and y ticks for right plots
 plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
-plt.setp([a.get_yticklabels() for a in axarr[:, 1:]], visible=False)
 plt.show()
