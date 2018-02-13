@@ -48,37 +48,67 @@ def get_class_accuracy(dataloader, net, classes):
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        #the input is 3 RBM, the output is 32 because we want 32 filters 3x3
-        self.conv0 = nn.Conv2d(3, 32, 4, stride=2, padding=2) # output is 17
-        self.conv1 = nn.Conv2d(32, 64, 4, padding=3) # Output is 20
-        self.mp = nn.MaxPool2d(2, stride=2) # Output is 10
-        self.conv2 = nn.Conv2d(64, 128, 3, padding=2) # output is 12
-        self.conv3 = nn.Conv2d(128, 64, 1) # Output is 12
-        # Do another map. Output is 6
-        self.bn1 = nn.BatchNorm1d(128)
-        self.bn2 = nn.BatchNorm2d(5 * 32 * 17 * 17)
+        self.branches = [
+            nn.Sequential(
+                nn.Conv2d(3, 32, 4, stride=2, padding=2), # output is 17
+                nn.ReLU(),
+                nn.Conv2d(32, 64, 4, padding=3), # Output is 20
+                nn.ReLU(),
+                nn.Conv2d(64, 32, 1), # Output is 20
+                nn.MaxPool2d(2, stride=2), # Output is 10
+                nn.Conv2d(32, 64, 3, padding=2), # output is 12
+                nn.ReLU(),
+                nn.Conv2d(64, 32, 1), # Output is 12
+                nn.ReLU(),
+                nn.MaxPool2d(2, stride=2) # Output is 6
+                )
+                ]
+        self.classifier = [
+            nn.Sequential(
+            nn.Linear(64 * 6 * 6, 128), #fully connected
+            nn.ReLU(),
+            nn.BatchNorm1d(128),
+            nn.Linear(128, 128),
+            nn.ReLU(),
+            nn.BatchNorm1d(128),
+            nn.Linear(128, 10)
+            )
+        ]
+            #     ),
+            #
+            # nn.Sequential(
+            #     nn.Conv2d(3, 32, 4, stride=2, padding=2), # output is 17
+            #     nn.ReLU(),
+            #     nn.Conv2d(32, 64, 4, padding=3), # Output is 20
+            #     nn.ReLU(),
+            #     nn.Conv2d(64, 32, 1), # Output is 20
+            #     nn.MaxPool2d(2, stride=2), # Output is 10
+            #     nn.Conv2d(32, 64, 3, padding=2), # output is 12
+            #     nn.ReLU(),
+            #     nn.Conv2d(64, 32, 1), # Output is 12
+            #     nn.ReLU(),
+            #     nn.MaxPool2d(2, stride=2), # Output is 6
+            #     nn.Linear(64 * 6 * 6, 128), #fully connected
+            #     nn.ReLU(),
+            #     nn.BatchNorm1d(128),
+            #     nn.Linear(128, 128),
+            #     nn.ReLU(),
+            #     nn.BatchNorm1d(128),
+            #     nn.Linear(128, 10)
+            #     )
 
-        self.fc0 = nn.Linear(64 * 6 * 6, 128) #fully connected
-        self.fc1 = nn.Linear(128, 128)
-        self.fc2 = nn.Linear(128, 10) #fully connected same number neurons as classes 10
+        # **EDIT**: need to call add_module
+        # for i, branch in enumerate(self.branches):
+        self.add_module(str(0), self.branches[0])
+
+        # for i, branch in enumerate(self.classifier):
+        self.add_module(str(1), self.classifier[0])
 
     def forward(self, x):
-
-        x = F.relu(self.conv0(x))
-        # x = self.bn2(x)
-        x = F.relu(self.conv1(x))
-        x = self.mp(x)
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = self.mp(x)
-        in_size = x.size(0)
-        x = x.view(in_size, -1) #flatten for fc
-        x = F.relu(self.fc0(x))
-        x = self.bn1(x)
-        x = F.relu(self.fc1(x))
-        x = self.bn1(x)
-        x = self.fc2(x)
-        return F.log_softmax(x)
+        f = self.branches[0](x)
+        x = x.view(x.size(0), -1)
+        return F.log_softmax(self.classifier(x))
+        # return F.log_softmax(torch.cat([b(x) for b in self.branches], 0))
 
 
 
