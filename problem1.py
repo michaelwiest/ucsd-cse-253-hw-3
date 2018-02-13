@@ -48,29 +48,37 @@ def get_class_accuracy(dataloader, net, classes):
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.branches = [
+        self.branches = nn.ModuleList([
             nn.Sequential(
                 nn.Conv2d(3, 32, 4, stride=2, padding=2), # output is 17
+                nn.BatchNorm1d(32),
                 nn.ReLU(),
                 nn.Conv2d(32, 64, 4, padding=3), # Output is 20
+                nn.BatchNorm1d(64),
                 nn.ReLU(),
                 nn.Conv2d(64, 32, 1), # Output is 20
+                nn.BatchNorm1d(32),
+                nn.ReLU(),
                 nn.MaxPool2d(2, stride=2), # Output is 10
                 nn.Conv2d(32, 64, 3, padding=2), # output is 12
+                nn.BatchNorm1d(64),
                 nn.ReLU(),
                 nn.Conv2d(64, 32, 1), # Output is 12
+                nn.BatchNorm1d(32),
                 nn.ReLU(),
                 nn.MaxPool2d(2, stride=2) # Output is 6
                 ),
             nn.Sequential(
                 nn.Conv2d(3, 32, 8, stride=4, padding=2), # output is 8
+                nn.BatchNorm1d(32),
                 nn.ReLU(),
-                nn.Conv2d(32, 64, 2, padding=2), # Output is 5
+                nn.Conv2d(32, 64, 4, stride=2, padding=2), # Output is 5
+                nn.BatchNorm1d(64),
                 nn.ReLU(),
                 nn.Conv2d(64, 32, 1)
                 ) # Output is 5
-                ]
-        self.classifier = [
+                ])
+        self.classifier = nn.ModuleList([
             nn.Sequential(
                 nn.Linear(32 * 6 * 6, 128), #fully connected
                 nn.ReLU(),
@@ -89,20 +97,19 @@ class Net(nn.Module):
                 nn.BatchNorm1d(128),
                 nn.Linear(128, 10)
             )
-        ]
+        ])
 
-        # **EDIT**: need to call add_module
-        # for i, branch in enumerate(self.branches):
-        self.add_module(str(0), self.branches[0])
-
-        # for i, branch in enumerate(self.classifier):
-        self.add_module(str(1), self.classifier[0])
 
     def forward(self, x):
-        x = self.branches[0](x)
-        x = x.view(x.size(0), -1)
-        x = self.classifier[0](x)
-        return F.log_softmax(x)
+        outs = [0] * len(self.branches)
+        for i in range(len(self.branches)):
+            outs[i] = self.branches[i](x)
+            outs[i] = outs[i].view(outs[i].size(0), -1)
+            outs[i] = self.classifier[i](outs[i])
+        # for out in outs:
+        #     print(out.shape)
+        return F.log_softmax(torch.cat([b for b in outs], 1))
+        # return F.log_softmax(x)
         # return F.log_softmax(self.classifier[0](x))
 
 
