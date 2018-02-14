@@ -1,6 +1,5 @@
 # https://github.com/pytorch/tutorials/blob/master/beginner_source/blitz/cifar10_tutorial.py
-# CIFAR10 dir =
-
+# CIFAR10 dir = '/Users/pablo_tostado/Pablo_Tostado/ML_Datasets/CIFAR10'
 
 from __future__ import print_function
 from data_loader import *
@@ -16,7 +15,6 @@ from six.moves import cPickle as pickle
 from  PIL import Image
 import numpy as np
 import random
-
 
 ######################## FUNCTIONS ########################
 
@@ -116,6 +114,7 @@ dataiter = iter(trainloader)
 images, labels = dataiter.next()
 # show images
 imshow(torchvision.utils.make_grid(images))
+plt.show(block=False)
 print(' '.join('%5s' % classes[labels[j]] for j in range(0, len(labels))))
 
 
@@ -127,14 +126,13 @@ train_labels = np.array(train_labels)
 
 fig = plt.figure(figsize=(8,3))
 for i in range(10):
-    print (i)
     ax = fig.add_subplot(2, 5, 1 + i, xticks=[], yticks=[])
     idx = np.where(train_labels==i)     # Find images with target label
     idx = random.choice(idx[0])         # Pick random idx of current class
     img = trainset[idx][0] #Take image
     ax.set_title(classes[i])
     imshow(img)
-plt.show()
+plt.show(block=False)
 
 ####################### RUN NET ############################################
 
