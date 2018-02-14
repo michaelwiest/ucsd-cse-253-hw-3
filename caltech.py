@@ -33,9 +33,11 @@ class Caltech256(Dataset):
 
 
     '''
-    def __init__(self, root_dir, transform=None, train = True):
+    def __init__(self, root_dir, transform=None, train = True, validation = False):
         self.images_per_class = 32 if train else 8
         self.start_image = (~train) * 32
+        if validation:
+            self.start_image = (~train) * 32 + 10
         self.end_image = self.start_image + self.images_per_class
         self.root_dir = root_dir
         self.transform = transform

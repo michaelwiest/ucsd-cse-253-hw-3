@@ -22,6 +22,7 @@ features_in = vgg.classifier._modules['6'].in_features
 softmax_model = nn.Sequential(nn.Linear(features_in,256),nn.Softmax())
 # vgg.classifier._modules['6'] = softmax_model
 vgg.fc = softmax_model
+vgg.fc.reguires_gradient = True
 if use_gpu:
     vgg.cuda()
 
@@ -35,7 +36,7 @@ example_transform = transforms.Compose(
 
 caltech256_train = Caltech256("256_ObjectCategories",
                     example_transform, train=True)
-
+pdb.set_trace()
 train_data = torch.utils.data.DataLoader(
     dataset = caltech256_train,
     batch_size = 32,
