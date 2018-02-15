@@ -10,6 +10,7 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import csv
 
+plt.style.use('ggplot')
 
 
 def get_accuracy(dataloader, net, classes):
@@ -45,107 +46,82 @@ def get_class_accuracy(dataloader, net, classes):
         class_perc.append(100.0 * class_correct[i] / class_total[i])
     return class_perc
 
-class Net(nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-        self.branches = nn.ModuleList([
-            nn.Sequential(
-                nn.Conv2d(3, 32, 4, stride=2, padding=2), # output is 17
-                nn.BatchNorm1d(32),
-                nn.ReLU(),
-                nn.Conv2d(32, 64, 4, padding=3), # Output is 20
-                nn.BatchNorm1d(64),
-                nn.ReLU(),
-                nn.MaxPool2d(2, stride=2), # Output is 10
-                nn.Conv2d(64, 128, 3, padding=2), # output is 12
-                nn.BatchNorm1d(128),
-                nn.ReLU(),
-                nn.Conv2d(128, 32, 1), # Output is 12
-                nn.BatchNorm1d(32),
-                nn.ReLU(),
-                nn.MaxPool2d(2, stride=2), # Output is 6
-                nn.Conv2d(32, 64, 2, padding=1), #Output is 7
-                nn.BatchNorm1d(64),
-                nn.ReLU(),
-                nn.Conv2d(64, 128, 3, padding=2, stride=2), #Output is 5
-                nn.BatchNorm1d(128),
-                nn.ReLU(),
-                nn.Conv2d(128, 32, 1), # Output is 5
-                nn.BatchNorm1d(32),
-                nn.ReLU()
+
+    class Net(nn.Module):
+        def __init__(self):
+            super(Net, self).__init__()
+            self.branches = nn.ModuleList([
+                nn.Sequential(
+                    nn.Conv2d(3, 32, 4, stride=2, padding=2), # output is 17
+                    nn.BatchNorm1d(32),
+                    nn.ReLU(),
+                    nn.Conv2d(32, 64, 4, padding=3), # Output is 20
+                    nn.BatchNorm1d(64),
+                    nn.ReLU(),
+                    nn.MaxPool2d(2, stride=2), # Output is 10
+                    nn.Conv2d(64, 128, 3, padding=2), # output is 12
+                    nn.BatchNorm1d(128),
+                    nn.ReLU(),
+                    nn.Dropout2d(),
+                    nn.Conv2d(128, 32, 1), # Output is 12
+                    nn.BatchNorm1d(32),
+                    nn.ReLU(),
+                    nn.MaxPool2d(2, stride=2), # Output is 6
+                    nn.Conv2d(32, 64, 2, padding=1), #Output is 7
+                    nn.BatchNorm1d(64),
+                    nn.ReLU(),
+                    nn.Conv2d(64, 128, 3, padding=2, stride=2), #Output is 5
+                    nn.BatchNorm1d(128),
+                    nn.ReLU(),
+                    nn.Conv2d(128, 32, 1), # Output is 5
+                    nn.BatchNorm1d(32),
+                    nn.ReLU()
+                    ),
+
+                nn.Sequential(
+                    nn.Conv2d(3, 32, 5, padding=1, dilation=1), # output is 30
+                    nn.BatchNorm1d(32),
+                    nn.ReLU(),
+                    nn.Conv2d(32, 64, 4, stride=3, padding=2, dilation=1), # Output is 10
+                    nn.BatchNorm1d(64),
+                    nn.ReLU(),
+                    nn.MaxPool2d(2, stride=2) # Output is 5
+                    )
+                    ])
+            self.classifier = nn.ModuleList([
+                nn.Sequential(
+                    nn.Linear(32 * 5 * 5, 128), #fully connected
+    #                 nn.Dropout(),
+                    nn.BatchNorm1d(128),
+                    nn.ReLU(),
+                    nn.Linear(128, 10)
                 ),
-            nn.Sequential(
-                nn.Conv2d(3, 32, 8, stride=4, padding=2), # output is 8
-                nn.BatchNorm1d(32),
-                nn.ReLU(),
-                nn.Conv2d(32, 64, 4, stride=2, padding=2), # Output is 5
-                nn.BatchNorm1d(64),
-                nn.ReLU()
-                ),
-            nn.Sequential(
-                nn.Conv2d(3, 32, 5, padding=1, dilation=1), # output is 30
-                nn.BatchNorm1d(32),
-                nn.ReLU(),
-                nn.Conv2d(32, 64, 4, stride=3, padding=2, dilation=1), # Output is 10
-                nn.BatchNorm1d(64),
-                nn.ReLU(),
-                nn.MaxPool2d(2, stride=2) # Output is 5
-                ),
-            nn.Sequential(
-                nn.Conv2d(3, 32, 3, padding=1, dilation=2, stride=3), # output is 10
-                nn.BatchNorm1d(32),
-                nn.ReLU(),
-                nn.Conv2d(32, 64, 2, dilation=2, stride=2), # Output is 4
-                nn.BatchNorm1d(64),
-                nn.ReLU()
+                nn.Sequential(
+                    nn.Linear(64 * 5 * 5, 128), #fully connected
+    #                 nn.Dropout(),
+                    nn.BatchNorm1d(128),
+                    nn.ReLU(),
+                    nn.Linear(128, 10)
                 )
-                ])
-        self.classifier = nn.ModuleList([
-            nn.Sequential(
-                nn.Linear(32 * 5 * 5, 128), #fully connected
-                nn.BatchNorm1d(128),
-                nn.ReLU(),
-                nn.Linear(128, 10)
-            ),
-            nn.Sequential(
-                nn.Linear(64 * 5 * 5, 128), #fully connected
-                nn.ReLU(),
-                nn.BatchNorm1d(128),
-                nn.Linear(128, 10)
-            ),
-            nn.Sequential(
-                nn.Linear(64 * 5 * 5, 128), #fully connected
-                nn.BatchNorm1d(128),
-                nn.ReLU(),
-                nn.Linear(128, 10)
-            ),
-            nn.Sequential(
-                nn.Linear(64 * 4 * 4, 128), #fully connected
-                nn.BatchNorm1d(128),
-                nn.ReLU(),
+            ])
+
+            self.final_fc = nn.Sequential(
+                nn.Linear(40, 128),
+                nn.Linear(128, 128),
                 nn.Linear(128, 10)
             )
-        ])
-
-        self.final_fc = nn.Sequential(
-            nn.Linear(40, 128),
-            nn.Linear(128, 128),
-            nn.Linear(128, 10)
-        )
 
 
-    def forward(self, x):
-        outs = [0] * len(self.branches)
-        for i in range(len(self.branches)):
-            outs[i] = self.branches[i](x)
-            outs[i] = outs[i].view(outs[i].size(0), -1)
-            outs[i] = self.classifier[i](outs[i])
-        cat = torch.cat([out for out in outs], 1)
-        # out = cat.view(cat.size(0), -1)
-        # out = self.final_fc(out)
-        return F.log_softmax(cat)
-
-
+        def forward(self, x):
+            outs = [0] * len(self.branches)
+            for i in range(len(self.branches)):
+                outs[i] = self.branches[i](x)
+                outs[i] = outs[i].view(outs[i].size(0), -1)
+                outs[i] = self.classifier[i](outs[i])
+            cat = torch.cat([out for out in outs], 1)
+            # out = cat.view(cat.size(0), -1)
+            # out = self.final_fc(out)
+            return F.log_softmax(cat)
 
 
 '''
@@ -181,7 +157,7 @@ Instantiate net and optimizer.
 
 net = Net()
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(net.parameters(), lr=0.01)
+optimizer = optim.Adam(net.parameters(), lr=0.03)
 
 
 
@@ -200,7 +176,7 @@ train_class_accuracy = []
 test_class_accuracy = []
 validation_class_accuracy = []
 
-epochs = 10
+epochs = 30
 for epoch in range(epochs):  # loop over the dataset multiple times
 
     running_loss = 0.0
@@ -249,12 +225,13 @@ Plotting
 '''
 Total accuracy
 '''
+fig=plt.figure(figsize=(16, 8), dpi= 80, facecolor='w', edgecolor='k')
 plt.plot(range(len(train_accuracy)), train_accuracy, label='Train accuracy: {}%'.format(str(train_accuracy[-1])[:4]))
 plt.plot(range(len(test_accuracy)), test_accuracy, label='Test accuracy: {}%'.format(str(test_accuracy[-1])[:4]))
 plt.plot(range(len(validation_accuracy)), validation_accuracy, label='Validation accuracy: {}%'.format(str(validation_accuracy[-1])[:4]))
 plt.xlabel('Epochs')
 plt.ylabel('Percent Accuracy')
-plt.title('Training accuracy over: \n{} Iterations'.format(epochs), fontsize=16)
+plt.title('Training accuracy over: \n{} Iterations'.format(len(train_accuracy)), fontsize=16)
 plt.legend(loc='lower right')
 plt.show()
 
@@ -262,7 +239,7 @@ plt.show()
 Accuracy by class.
 '''
 
-f, axarr = plt.subplots(2, 5)
+f, axarr = plt.subplots(2, 5, figsize=(18,9))
 for i in range(len(classes)):
     if int((i) / 5) > 0:
         row = 1
@@ -275,10 +252,12 @@ for i in range(len(classes)):
     axarr[row, col].plot(range(len(train_class_accuracy)), list(np.array(train_class_accuracy)[:, i]), label='Train accuracy')
     axarr[row, col].plot(range(len(test_class_accuracy)), list(np.array(test_class_accuracy)[:, i]), label='Test accuracy')
     axarr[row, col].plot(range(len(validation_class_accuracy)), list(np.array(validation_class_accuracy)[:, i]), label='Validation accuracy')
-    axarr[row, col].set_title('Accuracy for\nclass:{}'.format(classes[i]))
+    axarr[row, col].set_title('Accuracy for\nclass: {}'.format(classes[i]))
 
 # Fine-tune figure; hide x ticks for top plots and y ticks for right plots
 plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
+plt.suptitle('Accuracy By Class over {} Epochs'.format(len(train_accuracy)), fontsize=16)
+plt.figlegend(loc = 'lower center', ncol=5, labelspacing=0. )
 plt.show()
 
 with open('log.csv', 'w+') as csvfile:
