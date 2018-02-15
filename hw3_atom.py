@@ -4,8 +4,8 @@ import torch
 import torchvision
 from torch.autograd import Variable
 import torch.nn as nn
-from torchvision import transforms #add this line in the above snippet
-from torch.utils.data import DataLoader #add this line in the above snippet
+from torchvision import transforms
+from torch.utils.data import DataLoader
 import torch.nn.functional as F
 import torchvision
 import matplotlib.pyplot as plt
@@ -61,31 +61,30 @@ def get_class_accuracy(dataloader, net, classes):
         class_perc.append(100.0 * class_correct[i] / class_total[i])
     return class_perc
 
-## from torch.autograd import Variable
-import torch.nn as nn
-import torch.nn.functional as F
-
-#input, conv, pool, relu, conv, pool, relu, fc, fc
+#CNN network
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        #the input is 3 RBM, the output is 32 because we want 32 filters 3x3
+        #convolutional layers
+        #the input is 3 RBM, the output is 64 because we want 64 filters 3x3
         self.conv1 = nn.Conv2d(3, 64, 3, padding = 1)
-        #the input is the previous 32 filters and output is 64 filters, with 3x3
+        #the input is the previous 64 filters and output is 64 filters, with 3x3
         self.conv2 = nn.Conv2d(64, 64, 3, padding = 1)
         self.conv3 = nn.Conv2d(64, 128, 3, padding = 1)
         self.conv4 = nn.Conv2d(128, 128, 3, padding = 1)
         self.conv5 = nn.Conv2d(128, 256, 3, padding = 1)
         self.conv6 = nn.Conv2d(256, 256, 3, padding = 1)
 
+        #batch normalization
         self.batchnorm1 = nn.BatchNorm1d(64)
         self.batchnorm2 = nn.BatchNorm1d(128)
         self.batchnorm3 = nn.BatchNorm1d(256)
 
+        #max pooling
         self.mp = nn.MaxPool2d(2, stride=2) #2X2 with stride 2
 
         self.fc = nn.Linear(256*4*4, 500) #fully connected
-        self.fc2 = nn.Linear(500, 10) #fully connected same number neurons as classes 10
+        self.fc2 = nn.Linear(500, 10) #fully connected with classes 10
 
     def forward(self, x):
         x = F.relu(self.batchnorm1(self.conv1(x)))
@@ -101,7 +100,7 @@ class Net(nn.Module):
         #print (x.size(1))
         x = F.relu(self.fc(x))
         x = self.fc2(x)
-        return F.log_softmax(x)
+        return F.log_softmax(x) #softmax classifier
 
 net = Net()
 
@@ -121,7 +120,7 @@ test_class_accuracy = []
 validation_class_accuracy = []
 
 
-epochs = 100
+epochs = 80
 
 for epoch in range(epochs):  # loop over the dataset multiple times
 
@@ -158,6 +157,7 @@ for epoch in range(epochs):  # loop over the dataset multiple times
     test_class_accuracy.append(get_class_accuracy(testloader, net, classes))
     validation_class_accuracy.append(get_class_accuracy(validationloader, net, classes))
 
+#accuracy plots
 plt.plot(range(epochs), train_accuracy, label='Train accuracy')
 plt.plot(range(epochs), test_accuracy, label='Test accuracy')
 plt.plot(range(epochs), validation_accuracy, label='Validation accuracy')
@@ -165,6 +165,7 @@ plt.legend(loc='upper right')
 plt.style.use('ggplot')
 plt.show()
 
+#accuracy per class graphs
 f, axarr = plt.subplots(2, 5)
 for i in range(len(classes)):
     if int((i) / 5) > 0:
