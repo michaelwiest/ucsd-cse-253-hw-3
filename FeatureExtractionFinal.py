@@ -147,10 +147,10 @@ for key, vgg_model in model_dict.items():
         fh = open('Model' + str(key) + 'train_loss_4.txt', 'a')
         fh.write(str(loss_train_vec[-1])+ ', ')
         fh.close
-    data_dict['trainloss_'+str(key)] = running_loss
-    data_dict['testloss_'+str(key)] = running_loss_test
-    data_dict['trainacc_'+str(key)] = acc_train
-    data_dict['testacc_'+str(key)] = acc_test
+    data_dict['trainloss_'+str(key)] = running_loss_vec
+    data_dict['testloss_'+str(key)] = running_loss_test_vec
+    data_dict['trainacc_'+str(key)] = acc_train_vec
+    data_dict['testacc_'+str(key)] = acc_test_vec
 
     print('One model complete, onto next')
 # Total loss

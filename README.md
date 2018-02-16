@@ -34,11 +34,22 @@ Or just more generally into your position on the `ieng6` cluster.
 
 `python network_2.py`
 
-`python Network_3.py` 
+`python Network_3.py`
 
 These files will produce 2 figures each: percent accuracy and class accuracy.
 
 ### Problem 2
+'TransferLearningFinal.py'
+
+Performs transfer learning; will produce two plots of accuracy and loss, as well as 4 data files for accuracy and loss of training and testing data
+
+'FeatureExtractionFinal.py'
+
+Performs feature extraction after 3rd and 4th layers; will produce 4 plots of accuracy and loss for each of the 3rd and 4th layers, as well as 8 data files for accuracy and loss of training and testing data
+
+'PlotActivations.py'
+
+Plots 5 image inputs as original images, after 1st conv layer, and after last conv layer. Also plots 1st layer weights. Saves all images to a folder (must change directory to run)
 
 ### Credit
 

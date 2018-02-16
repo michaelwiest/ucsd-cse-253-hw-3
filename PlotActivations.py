@@ -43,11 +43,6 @@ def imshow(inp, weight_t=False):
         inp = inp + abs(inp.min())
     plt.imshow(inp)
 
-for i, data in enumerate(train_data, 0):
-    images, labels = data
-    imshow(images[1])
-
-
 vgg = models.vgg16(pretrained=True)
 for param in vgg.parameters():
     # make all parameters untrainiable except last
@@ -108,9 +103,15 @@ body_model = [i for i in mm.children()][0]
 layer1 = body_model[0]
 tensor = layer1.weight.data
 
+
 fig_w = plt.figure()
 for filter in range(tensor.shape[0]):
     plt.subplot(8,8,filter+1)
     imshow(tensor[filter],weight_t = True)
     plt.axis('off')
-fig_w.savefig('/Users/jenniferdawkins/Desktop/pics5/weights_2.png')
+fig_w.savefig('/Users/jenniferdawkins/Desktop/pics5/weights_3.png')
+
+fig_color = plt.figure()
+imshow(tensor[filter],weight_t = True)
+plt.colorbar()
+fig_color.savefig('/Users/jenniferdawkins/Desktop/pics5/colorbar.png')
