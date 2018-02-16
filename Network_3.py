@@ -105,9 +105,9 @@ class Net(nn.Module):
 net = Net()
 
 criterion = nn.CrossEntropyLoss()
-#optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9) #stochastic gradient descent
+optimizer = optim.SGD(net.parameters(), lr=0.01, momentum=0.9) #stochastic gradient descent
 #optimizer = optim.RMSprop(net.parameters(), lr = 0.0001)
-optimizer = optim.Adam(net.parameters(), lr=0.001)
+#optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 net.cuda()
 
@@ -161,7 +161,7 @@ for epoch in range(epochs):  # loop over the dataset multiple times
 plt.plot(range(epochs), train_accuracy, label='Train accuracy')
 plt.plot(range(epochs), test_accuracy, label='Test accuracy')
 plt.plot(range(epochs), validation_accuracy, label='Validation accuracy')
-plt.legend(loc='upper right')
+plt.legend(loc='best')
 plt.style.use('ggplot')
 plt.show()
 
