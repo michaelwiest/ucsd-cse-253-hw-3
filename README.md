@@ -29,9 +29,14 @@ Or just more generally into your position on the `ieng6` cluster.
 
 ## Running scripts
 ### Problem 1
+
 `python network_1.py`
+
 `python network_2.py`
-`python Network_3.py`
+
+`python Network_3.py` 
+
+### Problem 2
 
 ### Credit
 
