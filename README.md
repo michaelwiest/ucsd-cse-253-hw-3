@@ -27,6 +27,12 @@ You can clone this repo into either the container started from:
 Or just more generally into your position on the `ieng6` cluster.
 
 
+## Running scripts
+### Problem 1
+`python network_1.py`
+`python network_2.py`
+`python Network_3.py`
+
 ### Credit
 
 Credit to [this repo](https://gist.github.com/kevinzakka/d33bf8d6c7f06a9d8c76d97a7879f5cb)
