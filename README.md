@@ -36,6 +36,8 @@ Or just more generally into your position on the `ieng6` cluster.
 
 `python Network_3.py` 
 
+These files will produce 2 figures each: percent accuracy and class accuracy.
+
 ### Problem 2
 
 ### Credit
